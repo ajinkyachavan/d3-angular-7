@@ -19,15 +19,17 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // get data
     this.inputArray = this.appService.getDataFromUrl();
-    
+    // map date and time to normalize for chart
     this.parseData()
+    // actual drawing
     this.drawChart();
   }
 
   parseData() {
     if (this.inputArray) {
+      // for each date and time => normalize
       this.inputArray.forEach(arr => {
-        this.myD3Array.push(arr[0], +arr[1]);
+        this.myD3Array.push([new Date(arr['TRANS_DATE']).getTime(), +arr['TIME_SEC']]);
       });
     }
   }
@@ -49,16 +51,17 @@ export class AppComponent implements OnInit {
 
     let x = d3.scaleTime().rangeRound([0, width]);
     let y = d3.scaleLinear().rangeRound([height, 0]);
+    
+    x.domain(d3.extent(this.myD3Array, function (d) { return d[0] }));
+    y.domain(d3.extent(this.myD3Array, function (d) { return d[1] }));
 
-    x.domain(d3.extent(this.inputArray, function (d) { return new Date(d['TRANS_DATE']) }));
-    y.domain(d3.extent(this.inputArray, function (d) { return +d['TIME_SEC'] }));
-
+    console.log(this.myD3Array)
     let line = d3.line()
-      .x(function (d) { return x(new Date(d['TRANS_DATE'])) })
-      .y(function (d) { return y(+d['TIME_SEC']) })
+      .x(function (d) { return x(d[0]) })
+      .y(function (d) { return y(d[1]) })
     
     g.append("path")
-      .datum(this.inputArray)
+      .datum(this.myD3Array)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-linejoin", "round")
