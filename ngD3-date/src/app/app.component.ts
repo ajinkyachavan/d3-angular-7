@@ -17,12 +17,26 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    // get data
-    this.inputArray = this.appService.getDataFromUrl();
-    // map date and time to normalize for chart
-    this.parseData()
-    // actual drawing
-    this.drawChart();
+    this.appService.getDataFromUrl()
+      .subscribe(
+        (response: any) => {
+          // console.log(response);
+          this.inputArray = response;
+        },
+        (error) => {
+          console.log(error);
+        },
+        () => {
+          // when observable completes successfully, this block is called
+          // since observable is asynchronous, calling function which use data from 
+          // result of observable will not work. So use this block/function to call things using result
+
+          // map date and time to normalize for chart
+          this.parseData()
+          // actual drawing
+          this.drawChart();
+        }
+      )
   }
 
   parseData() {
