@@ -28,8 +28,9 @@ export class AppComponent implements OnInit {
         },
         () => {
           // when observable completes successfully, this block is called
-          // since observable is asynchronous, calling function which use data from 
-          // result of observable will not work. So use this block/function to call things using result
+          // since observable is asynchronous, calling function which are called 
+          // outside the block but use the data from result of this observable will not work. 
+          // So use this block/function to call things using result
 
           // map date and time to normalize for chart
           this.parseData()
