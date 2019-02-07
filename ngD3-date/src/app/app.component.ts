@@ -17,8 +17,9 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-
+    // get data
     this.inputArray = this.appService.getDataFromUrl();
+    
     this.parseData()
     this.drawChart();
   }
@@ -49,25 +50,21 @@ export class AppComponent implements OnInit {
     let x = d3.scaleTime().rangeRound([0, width]);
     let y = d3.scaleLinear().rangeRound([height, 0]);
 
-    let myarr = [[1, 11.61], [2, 8], [3, 2], [4, 1], [5, 20]];
-
-
-    x.domain(d3.extent(myarr, function (d) { return d[0] }));
-    y.domain(d3.extent(myarr, function (d) { return d[1] }));
+    x.domain(d3.extent(this.inputArray, function (d) { return new Date(d['TRANS_DATE']) }));
+    y.domain(d3.extent(this.inputArray, function (d) { return +d['TIME_SEC'] }));
 
     let line = d3.line()
-      .x(function (d) { return x(d[0]) })
-      .y(function (d) { return y(d[1]) })
+      .x(function (d) { return x(new Date(d['TRANS_DATE'])) })
+      .y(function (d) { return y(+d['TIME_SEC']) })
     
     g.append("path")
-      .datum(myarr)
+      .datum(this.inputArray)
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("stroke-width", 1.5)
       .attr("d", line);
-
   }
 
 }
