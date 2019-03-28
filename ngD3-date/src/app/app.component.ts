@@ -59,9 +59,10 @@ export class AppComponent implements OnInit {
     let margin = { top: 20, right: 20, bottom: 30, left: 50 };
     let width = svgWidth - margin.left - margin.right;
     let height = svgHeight - margin.top - margin.bottom;
-    let svg = d3.select('svg')
-      .attr('width', svgWidth)
-      .attr('height', svgHeight);
+    let svg = d3.select('.first')
+    .append("svg")
+    .attr('width', svgWidth)
+    .attr('height', svgHeight);
 
     let g = svg.append("g")
       .attr("transform",
