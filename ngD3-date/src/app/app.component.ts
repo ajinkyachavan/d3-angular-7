@@ -20,7 +20,6 @@ export class AppComponent implements OnInit {
     this.appService.getDataFromUrl()
       .subscribe(
         (response: any) => {
-          console.log(response);
           this.inputArray = response;
         },
         (error) => {
@@ -36,6 +35,9 @@ export class AppComponent implements OnInit {
               case 'cubeLineChart':
                 this.myD3Array = this.inputArray[chartType];
                 this.drawChart();
+                break;
+              case 'dateLineChart2':
+                console.log(this.inputArray[chartType]);
                 break;
             }
           });
