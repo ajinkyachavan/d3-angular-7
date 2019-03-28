@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AppService } from './app.service';
 import * as d3 from 'd3';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,7 @@ export class AppComponent implements OnInit {
           Object.keys(this.inputArray).forEach(chartType => {
             switch (chartType) {
               case 'dateLineChart':
-                this.parseData(this.inputArray[chartType]);
+                this.parseData(chartType, this.inputArray[chartType]);
                 this.drawChart();
                 break;
               case 'cubeLineChart':
@@ -37,7 +38,11 @@ export class AppComponent implements OnInit {
                 this.drawChart();
                 break;
               case 'dateLineChart2':
-                console.log(this.inputArray[chartType]);
+                let x = _.map(this.inputArray[chartType], function (obj) {
+                  return [obj.date, obj.close]
+                });
+                this.parseData('dateLineChart2', x);
+                this.drawChart();
                 break;
             }
           });
@@ -45,12 +50,24 @@ export class AppComponent implements OnInit {
       )
   }
 
-  parseData(chart) {
-    if (chart) {
-      // for each date and time => normalize
-      chart.forEach(arr => {
-        this.myD3Array.push([new Date(arr['TRANS_DATE']).getTime(), +arr['TIME_SEC']]);
-      });
+  parseData(chartType, chart) {
+    switch (chartType) {
+      case 'dateLineChart':
+        if (chart) {
+          // for each date and time => normalize
+          chart.forEach(arr => {
+            this.myD3Array.push([new Date(arr['TRANS_DATE']).getTime(), +arr['TIME_SEC']]);
+          });
+        }
+        break;
+      case 'dateLineChart2':
+        if (chart) {
+          // for each date and time => normalize
+          chart.forEach(arr => {
+            this.myD3Array.push([new Date(arr[0]).getTime(), +arr[1]]);
+          });
+        }
+        break;
     }
   }
 
@@ -60,9 +77,9 @@ export class AppComponent implements OnInit {
     let width = svgWidth - margin.left - margin.right;
     let height = svgHeight - margin.top - margin.bottom;
     let svg = d3.select('.first')
-    .append("svg")
-    .attr('width', svgWidth)
-    .attr('height', svgHeight);
+      .append("svg")
+      .attr('width', svgWidth)
+      .attr('height', svgHeight);
 
     let g = svg.append("g")
       .attr("transform",
