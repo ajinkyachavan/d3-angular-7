@@ -20,30 +20,33 @@ export class AppComponent implements OnInit {
     this.appService.getDataFromUrl()
       .subscribe(
         (response: any) => {
-          // console.log(response);
+          console.log(response);
           this.inputArray = response;
         },
         (error) => {
           console.log(error);
         },
         () => {
-          // when observable completes successfully, this block is called
-          // since observable is asynchronous, calling function which are called 
-          // outside the block but use the data from result of this observable will not work. 
-          // So use this block/function to call things using result
-
-          // map date and time to normalize for chart
-          this.parseData()
-          // actual drawing
-          this.drawChart();
+          Object.keys(this.inputArray).forEach(chartType => {
+            switch (chartType) {
+              case 'dateLineChart':
+                this.parseData(this.inputArray[chartType]);
+                this.drawChart();
+                break;
+              case 'cubeLineChart':
+                this.myD3Array = this.inputArray[chartType];
+                this.drawChart();
+                break;
+            }
+          });
         }
       )
   }
 
-  parseData() {
-    if (this.inputArray) {
+  parseData(chart) {
+    if (chart) {
       // for each date and time => normalize
-      this.inputArray.forEach(arr => {
+      chart.forEach(arr => {
         this.myD3Array.push([new Date(arr['TRANS_DATE']).getTime(), +arr['TIME_SEC']]);
       });
     }
@@ -58,7 +61,6 @@ export class AppComponent implements OnInit {
       .attr('width', svgWidth)
       .attr('height', svgHeight);
 
-
     let g = svg.append("g")
       .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")"
@@ -66,7 +68,7 @@ export class AppComponent implements OnInit {
 
     let x = d3.scaleTime().rangeRound([0, width]);
     let y = d3.scaleLinear().rangeRound([height, 0]);
-    
+
     x.domain(d3.extent(this.myD3Array, function (d) { return d[0] }));
     y.domain(d3.extent(this.myD3Array, function (d) { return d[1] }));
 
@@ -74,7 +76,24 @@ export class AppComponent implements OnInit {
     let line = d3.line()
       .x(function (d) { return x(d[0]) })
       .y(function (d) { return y(d[1]) })
-    
+
+    g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .append("text")
+      .select(".domain")
+      .remove();
+
+    g.append("g")
+      .call(d3.axisLeft(y))
+      .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Price ($)");
+
     g.append("path")
       .datum(this.myD3Array)
       .attr("fill", "none")
